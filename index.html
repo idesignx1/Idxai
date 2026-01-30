@@ -3,316 +3,112 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>IdxAi — Sooonnn (AR + Dance)</title>
+  <title>IdxAi — Sooonnn (AR)</title>
 
+  <!-- model-viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
-    :root{
-      --glass: rgba(255,255,255,.12);
-      --border: rgba(255,255,255,.22);
-      --ink: rgba(255,255,255,.92);
-    }
-    html, body{height:100%;margin:0;overflow:hidden;background:#050b18;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
+    html,body{height:100%;margin:0;overflow:hidden;background:#050b18;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
     #sea{position:fixed;inset:0;width:100%;height:100%;display:block;}
-    .vignette{position:fixed;inset:-25%;background:
-      radial-gradient(circle at 50% 40%, rgba(255,255,255,.08), transparent 45%),
-      radial-gradient(circle at 20% 15%, rgba(0,255,255,.08), transparent 35%),
-      radial-gradient(circle at 80% 75%, rgba(255,200,0,.06), transparent 40%);
-      pointer-events:none;mix-blend-mode:screen;transform:translate3d(0,0,0);
+    .glass{
+      position:fixed;left:16px;right:16px;top:16px;z-index:10;
+      padding:14px;border-radius:18px;
+      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+      color:rgba(255,255,255,.92);backdrop-filter:blur(10px);
     }
-    .hud{position:fixed;inset:14px 14px auto 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;z-index:20;}
-    .badge{padding:12px 14px;border-radius:18px;background:var(--glass);border:1px solid var(--border);color:var(--ink);backdrop-filter:blur(10px);max-width:78vw;}
-    .badge h1{margin:0;font-size:18px}
-    .badge p{margin:6px 0 0;font-size:13px;opacity:.88;line-height:1.35}
-    .miniBtn{border:1px solid var(--border);background:rgba(255,255,255,.10);color:var(--ink);padding:10px 12px;border-radius:14px;backdrop-filter:blur(10px);cursor:pointer;user-select:none;white-space:nowrap;}
-
-    .stage{position:fixed;inset:100px 14px 92px 14px;display:grid;place-items:center;z-index:10;}
-    .viewerWrap{
-      width:min(560px,96vw);height:min(660px,66vh);
-      border-radius:28px;background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(10px);
+    .glass h1{margin:0;font-size:18px}
+    .glass p{margin:8px 0 0;font-size:13px;opacity:.9;line-height:1.4}
+    .stage{position:fixed;inset:110px 16px 90px 16px;display:grid;place-items:center;z-index:5;}
+    model-viewer{
+      width:min(520px,96vw);height:min(620px,62vh);
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:26px;backdrop-filter:blur(10px);
       box-shadow:0 30px 70px rgba(0,0,0,.45);
-      overflow:hidden;position:relative;
-      transform: translate3d(0,0,0);
+      overflow:hidden;
     }
-    model-viewer{width:100%;height:100%;background:transparent;}
-
-    .overlayText{
-      position:absolute;inset:14px 14px auto 14px;display:flex;align-items:center;justify-content:space-between;
-      z-index:5;pointer-events:none;color:#fff;text-shadow:0 12px 40px rgba(0,0,0,.65);
+    .bottom{position:fixed;left:16px;right:16px;bottom:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;z-index:10;}
+    button{
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(0,255,255,.14);
+      color:#fff;padding:12px 14px;border-radius:14px;font-weight:700;cursor:pointer;
     }
-    .brand{font-weight:900;letter-spacing:.8px;font-size:22px}
-    .soon{font-weight:900;opacity:.95}
-
-    .status{
-      position:absolute;left:14px;right:14px;bottom:14px;z-index:6;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:10px 12px;border-radius:16px;background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.92);
-      backdrop-filter:blur(10px);font-size:12px;
-    }
-    .pill{padding:7px 10px;border-radius:999px;background:rgba(0,255,255,.14);border:1px solid rgba(255,255,255,.18);font-weight:800;white-space:nowrap;}
-
-    .bottom{position:fixed;inset:auto 14px 14px 14px;z-index:20;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-    .cta{border:1px solid rgba(255,255,255,.22);background:rgba(0,255,255,.14);color:#fff;padding:12px 14px;border-radius:14px;cursor:pointer;font-weight:850;transition:transform .15s ease;}
-    .cta.secondary{background:rgba(255,255,255,.10);}
-    .note{width:100%;text-align:center;color:rgba(255,255,255,.86);font-size:12px;opacity:.92}
-
-    .shakeToast{
-      position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);
-      opacity:0;transition:opacity .18s ease, transform .18s ease;z-index:30;
-      padding:10px 12px;border-radius:16px;background:rgba(0,0,0,.45);
-      border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.92);
-      backdrop-filter:blur(10px);font-size:12px;pointer-events:none;text-align:center;max-width:86vw;
-    }
-    .shakeToast.on{opacity:1;transform:translateX(-50%) translateY(0);}
-
-    /* رقصة CSS للبطاقة كـ fallback */
-    .danceCard{
-      animation: bounce 0.55s ease-in-out infinite alternate, sway 1.2s ease-in-out infinite;
-    }
-    @keyframes bounce{ from{ transform:translate3d(0,0,0);} to{ transform:translate3d(0,-10px,0);} }
-    @keyframes sway{ 0%,100%{ filter: drop-shadow(0 25px 40px rgba(0,0,0,.35)); } 50%{ filter: drop-shadow(0 35px 55px rgba(0,0,0,.45)); } }
+    .note{width:100%;text-align:center;color:rgba(255,255,255,.86);font-size:12px;opacity:.9}
   </style>
 </head>
 
 <body>
   <canvas id="sea"></canvas>
-  <div class="vignette" id="vignette"></div>
 
-  <div class="hud">
-    <div class="badge">
-      <h1>IdxAi — روبوت يرقص + AR</h1>
-      <p>اضغط “Dance” لتشغيل رقصة. هزّ الجوال يجهز زر AR.</p>
-    </div>
-    <button class="miniBtn" id="motionBtn">تفعيل الحركة</button>
+  <div class="glass">
+    <h1>IdxAi — Sooonnn</h1>
+    <p>اضغط “افتح AR الآن” عشان يظهر الـ AR الواقعي على الكاميرا (مطلوب تفاعل يدوي من المتصفح).</p>
   </div>
 
   <div class="stage">
-    <div class="viewerWrap" id="wrap">
-      <div class="overlayText">
-        <div class="brand">IdxAi</div>
-        <div class="soon">Sooonnn</div>
-      </div>
-
-      <model-viewer id="mv"
-        src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
-        ios-src="https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz"
-        ar
-        ar-modes="webxr scene-viewer quick-look"
-        camera-controls
-        auto-rotate
-        shadow-intensity="0.9"
-        exposure="1.0"
-        alt="IdxAi Robot"
-        autoplay>
-      </model-viewer>
-
-      <div class="status">
-        <div id="statusText">الحالة: جاهز ✅</div>
-        <div class="pill" id="animPill">ANIM: فحص…</div>
-      </div>
-    </div>
+    <model-viewer id="mv"
+      src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+      ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      camera-controls
+      auto-rotate
+      shadow-intensity="0.8"
+      exposure="1.0"
+      alt="IdxAi AR Model">
+    </model-viewer>
   </div>
 
-  <div class="shakeToast" id="toast">هزّة! الآن اضغط “افتح AR الآن” 👇</div>
-
   <div class="bottom">
-    <button class="cta" id="danceBtn">Dance 🕺</button>
-    <button class="cta secondary" id="stopBtn">Stop</button>
-    <button class="cta" id="arBtn">افتح AR الآن</button>
-    <div class="note">مهم: AR يحتاج HTTPS + Chrome/Safari. الرقصة تعمل حتى بدون AR.</div>
+    <button id="arBtn">افتح AR الآن</button>
+    <div class="note">مهم: لازم تفتح الصفحة عبر HTTPS (مثل Netlify)، وإلا الكاميرا/AR ما تشتغل.</div>
   </div>
 
 <script>
 (() => {
-  // ===== بحر متحرك =====
-  const canvas = document.getElementById('sea');
-  const ctx = canvas.getContext('2d', { alpha:false });
-  let W=0, H=0, t=0;
+  // بحر متحرك خفيف (Canvas)
+  const c = document.getElementById('sea');
+  const ctx = c.getContext('2d',{alpha:false});
+  let W=0,H=0,t=0;
+  const resize=()=>{W=c.width=innerWidth*devicePixelRatio;H=c.height=innerHeight*devicePixelRatio;};
+  addEventListener('resize',resize,{passive:true}); resize();
 
-  function resize(){
-    W = canvas.width = innerWidth * devicePixelRatio;
-    H = canvas.height = innerHeight * devicePixelRatio;
-  }
-  addEventListener('resize', resize, {passive:true});
-  resize();
+  function draw(){
+    t+=0.008;
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#030817'); g.addColorStop(1,'#062a3a');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
 
-  let tiltX=0, tiltY=0;
-  const vignette = document.getElementById('vignette');
-  const wrap = document.getElementById('wrap');
-
-  function drawSea(){
-    t += 0.008;
-    const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, '#030817'); g.addColorStop(1, '#062a3a');
-    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-
-    for(let l=0; l<4; l++){
-      const yBase = H*(0.45 + l*0.12) + tiltY*18*devicePixelRatio;
-      const amp  = (18 + l*10) * devicePixelRatio;
-      const freq = 0.006 + l*0.0015;
-      const speed= 0.7 + l*0.35;
+    for(let l=0;l<4;l++){
+      const yBase=H*(0.45+l*0.12);
+      const amp=(18+l*10)*devicePixelRatio;
+      const freq=0.006+l*0.0015;
+      const speed=0.7+l*0.35;
 
       ctx.beginPath();
-      for(let x=0; x<=W; x += 8*devicePixelRatio){
-        const y = yBase
-          + Math.sin((x*freq) + t*speed + l)*amp
-          + Math.sin((x*freq*1.6) + t*speed*1.2)*amp*0.25;
+      for(let x=0;x<=W;x+=8*devicePixelRatio){
+        const y=yBase + Math.sin((x*freq)+t*speed+l)*amp + Math.sin((x*freq*1.6)+t*speed*1.2)*amp*0.25;
         if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
       }
       ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
-      ctx.fillStyle = `rgba(0, ${120+l*18}, ${140+l*22}, ${0.14+l*0.05})`;
+      ctx.fillStyle=`rgba(0,${120+l*18},${140+l*22},${0.14+l*0.05})`;
       ctx.fill();
     }
-    requestAnimationFrame(drawSea);
+    requestAnimationFrame(draw);
   }
-  drawSea();
+  draw();
 
-  // ===== Controls =====
+  // تشغيل AR (لازم زر)
   const mv = document.getElementById('mv');
-  const arBtn = document.getElementById('arBtn');
-  const danceBtn = document.getElementById('danceBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const motionBtn = document.getElementById('motionBtn');
-  const toast = document.getElementById('toast');
-  const statusText = document.getElementById('statusText');
-  const animPill = document.getElementById('animPill');
-
-  function showToast(msg){
-    toast.textContent = msg;
-    toast.classList.add('on');
-    setTimeout(()=>toast.classList.remove('on'), 1600);
-  }
-
-  // --- قائمة أنيميشنات داخل الموديل ---
-  let animations = [];
-  function pickDanceName(list){
-    const lower = list.map(a => String(a).toLowerCase());
-    const candidates = ["dance", "dancing", "hiphop", "shuffle", "wave", "run", "walk", "idle"];
-    for (const c of candidates){
-      const idx = lower.findIndex(x => x.includes(c));
-      if (idx >= 0) return list[idx];
-    }
-    return list[0] || null;
-  }
-
-  mv.addEventListener('load', () => {
-    animations = (mv.availableAnimations || []).slice();
-    if (animations.length){
-      animPill.textContent = "ANIM: " + animations.length;
-      statusText.textContent = "الحالة: تم تحميل الروبوت ✅";
+  document.getElementById('arBtn').addEventListener('click', async ()=>{
+    if (mv && typeof mv.activateAR === 'function') {
+      try { await mv.activateAR(); }
+      catch { alert('AR غير متاح على جهازك أو الصفحة ليست HTTPS أو الإذن مرفوض.'); }
     } else {
-      animPill.textContent = "ANIM: none";
-      statusText.textContent = "الحالة: لا توجد أنيميشنات — سنستخدم رقصة CSS.";
+      alert('model-viewer لم يجهز بعد.');
     }
   });
-
-  // --- زر AR ---
-  arBtn.addEventListener('click', async ()=>{
-    try{
-      statusText.textContent = "الحالة: محاولة فتح AR…";
-      await mv.activateAR();
-      statusText.textContent = "الحالة: تم فتح AR ✅";
-    }catch(e){
-      statusText.textContent = "الحالة: AR غير متاح على هذا الجهاز/المتصفح.";
-      showToast("AR غير متاح هنا. جرّب Chrome + ARCore + HTTPS.");
-      console.warn(e);
-    }
-  });
-
-  // --- Dance ---
-  let dancing = false;
-  function startDance(){
-    dancing = true;
-    wrap.classList.add('danceCard');
-
-    if (animations.length){
-      const name = pickDanceName(animations);
-      mv.animationName = name;
-      mv.autoplay = true;
-      mv.play();
-      animPill.textContent = "ANIM: " + name;
-      statusText.textContent = "الحالة: الروبوت يرقص ✅";
-      showToast("Dance: " + name);
-    } else {
-      statusText.textContent = "الحالة: رقصة CSS ✅";
-      showToast("Dance (CSS) ✅");
-    }
-  }
-
-  function stopDance(){
-    dancing = false;
-    wrap.classList.remove('danceCard');
-    try { mv.pause(); } catch {}
-    statusText.textContent = "الحالة: توقف ✅";
-    showToast("Stop ✅");
-  }
-
-  danceBtn.addEventListener('click', startDance);
-  stopBtn.addEventListener('click', stopDance);
-
-  // ===== Motion (Tilt + Shake) =====
-  let motionEnabled = false;
-  let lastShake = 0;
-
-  function onOrientation(e){
-    const g = (e.gamma ?? 0);
-    const b = (e.beta  ?? 0);
-    tiltX = Math.max(-1, Math.min(1, g / 30));
-    tiltY = Math.max(-1, Math.min(1, b / 30));
-
-    vignette.style.transform = `translate3d(${tiltX*14}px, ${tiltY*10}px, 0)`;
-    if (!dancing){
-      wrap.style.transform = `translate3d(${tiltX*8}px, ${tiltY*6}px, 0) rotate(${tiltX*2.5}deg)`;
-    }
-  }
-
-  function onMotion(e){
-    const a = e.accelerationIncludingGravity;
-    if(!a) return;
-    const ax=a.x||0, ay=a.y||0, az=a.z||0;
-    const mag = Math.sqrt(ax*ax + ay*ay + az*az);
-    const now = performance.now();
-
-    if (mag > 18 && (now - lastShake) > 1200){
-      lastShake = now;
-
-      // لا نفتح AR تلقائيًا (قيود الأمان) — نجهز زر AR
-      arBtn.style.transform = "scale(1.12)";
-      arBtn.textContent = "هزّة! اضغط لفتح AR الآن";
-      arBtn.scrollIntoView({behavior:"smooth", block:"center"});
-      if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-      showToast("هزّة! زر AR جاهز 👇");
-      setTimeout(()=>{
-        arBtn.style.transform = "scale(1)";
-        arBtn.textContent = "افتح AR الآن";
-      }, 1600);
-    }
-  }
-
-  async function enableMotion(){
-    if (motionEnabled) return;
-    try{
-      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        const r = await DeviceMotionEvent.requestPermission();
-        if (r !== 'granted') { showToast("تم رفض صلاحية الحركة."); return; }
-      }
-      window.addEventListener('deviceorientation', onOrientation, {passive:true});
-      window.addEventListener('devicemotion', onMotion, {passive:true});
-      motionEnabled = true;
-      motionBtn.textContent = "الحركة مفعلة ✓";
-      showToast("تم تفعيل الحركة ✅");
-    }catch(err){
-      motionBtn.textContent = "تعذر التفعيل";
-      showToast("تعذر تفعيل الحركة.");
-      console.warn(err);
-    }
-  }
-
-  motionBtn.addEventListener('click', enableMotion);
-  window.addEventListener('click', () => { if (!motionEnabled) enableMotion(); }, { once:true });
 })();
 </script>
 </body>
