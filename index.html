@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>IdxAi — Sooonnn (AR)</title>
+  <title>IdxAi — Sooonnn (AR + Dance)</title>
 
-  <!-- Google <model-viewer> -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
@@ -13,208 +12,68 @@
       --glass: rgba(255,255,255,.12);
       --border: rgba(255,255,255,.22);
       --ink: rgba(255,255,255,.92);
-      --aqua: rgba(0,255,255,.16);
     }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: #050b18;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    html, body{height:100%;margin:0;overflow:hidden;background:#050b18;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
+    #sea{position:fixed;inset:0;width:100%;height:100%;display:block;}
+    .vignette{position:fixed;inset:-25%;background:
+      radial-gradient(circle at 50% 40%, rgba(255,255,255,.08), transparent 45%),
+      radial-gradient(circle at 20% 15%, rgba(0,255,255,.08), transparent 35%),
+      radial-gradient(circle at 80% 75%, rgba(255,200,0,.06), transparent 40%);
+      pointer-events:none;mix-blend-mode:screen;transform:translate3d(0,0,0);
     }
+    .hud{position:fixed;inset:14px 14px auto 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;z-index:20;}
+    .badge{padding:12px 14px;border-radius:18px;background:var(--glass);border:1px solid var(--border);color:var(--ink);backdrop-filter:blur(10px);max-width:78vw;}
+    .badge h1{margin:0;font-size:18px}
+    .badge p{margin:6px 0 0;font-size:13px;opacity:.88;line-height:1.35}
+    .miniBtn{border:1px solid var(--border);background:rgba(255,255,255,.10);color:var(--ink);padding:10px 12px;border-radius:14px;backdrop-filter:blur(10px);cursor:pointer;user-select:none;white-space:nowrap;}
 
-    /* البحر */
-    #sea { position: fixed; inset: 0; width: 100%; height: 100%; display:block; }
-
-    /* طبقة إضاءة */
-    .vignette{
-      position: fixed; inset: -25%;
-      background:
-        radial-gradient(circle at 50% 40%, rgba(255,255,255,.08), transparent 45%),
-        radial-gradient(circle at 20% 15%, rgba(0,255,255,.08), transparent 35%),
-        radial-gradient(circle at 80% 75%, rgba(255,200,0,.06), transparent 40%);
-      pointer-events: none;
-      mix-blend-mode: screen;
+    .stage{position:fixed;inset:100px 14px 92px 14px;display:grid;place-items:center;z-index:10;}
+    .viewerWrap{
+      width:min(560px,96vw);height:min(660px,66vh);
+      border-radius:28px;background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(10px);
+      box-shadow:0 30px 70px rgba(0,0,0,.45);
+      overflow:hidden;position:relative;
       transform: translate3d(0,0,0);
     }
+    model-viewer{width:100%;height:100%;background:transparent;}
 
-    /* HUD */
-    .hud{
-      position: fixed;
-      inset: 14px 14px auto 14px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 10px;
-      z-index: 20;
-    }
-
-    .badge{
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: var(--glass);
-      border: 1px solid var(--border);
-      color: var(--ink);
-      backdrop-filter: blur(10px);
-      max-width: 78vw;
-    }
-
-    .badge h1{
-      margin:0;
-      font-size: 18px;
-      letter-spacing: .2px;
-    }
-    .badge p{
-      margin: 6px 0 0 0;
-      font-size: 13px;
-      opacity: .88;
-      line-height: 1.35;
-    }
-
-    .miniBtn{
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.10);
-      color: var(--ink);
-      padding: 10px 12px;
-      border-radius: 14px;
-      backdrop-filter: blur(10px);
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
-    }
-
-    /* منطقة العرض */
-    .stage{
-      position: fixed;
-      inset: 100px 14px 92px 14px;
-      display: grid;
-      place-items: center;
-      z-index: 10;
-    }
-
-    /* بطاقة الموديل */
-    .viewerWrap{
-      width: min(560px, 96vw);
-      height: min(660px, 66vh);
-      border-radius: 28px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 30px 70px rgba(0,0,0,.45);
-      overflow: hidden;
-      position: relative;
-    }
-
-    model-viewer{
-      width: 100%;
-      height: 100%;
-      background: transparent;
-    }
-
-    /* Overlay نص داخل البطاقة */
     .overlayText{
-      position:absolute;
-      inset: 14px 14px auto 14px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      z-index: 5;
-      pointer-events:none;
-      color:#fff;
-      text-shadow: 0 12px 40px rgba(0,0,0,.65);
+      position:absolute;inset:14px 14px auto 14px;display:flex;align-items:center;justify-content:space-between;
+      z-index:5;pointer-events:none;color:#fff;text-shadow:0 12px 40px rgba(0,0,0,.65);
     }
-    .brand{
-      font-weight: 900;
-      letter-spacing: .8px;
-      font-size: 22px;
-    }
-    .soon{
-      font-weight: 900;
-      opacity: .95;
-    }
+    .brand{font-weight:900;letter-spacing:.8px;font-size:22px}
+    .soon{font-weight:900;opacity:.95}
 
     .status{
-      position:absolute;
-      left:14px; right:14px; bottom:14px;
-      z-index: 6;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.16);
-      color: rgba(255,255,255,.92);
-      backdrop-filter: blur(10px);
-      font-size: 12px;
+      position:absolute;left:14px;right:14px;bottom:14px;z-index:6;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:10px 12px;border-radius:16px;background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);font-size:12px;
     }
+    .pill{padding:7px 10px;border-radius:999px;background:rgba(0,255,255,.14);border:1px solid rgba(255,255,255,.18);font-weight:800;white-space:nowrap;}
 
-    .pill{
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(0,255,255,.14);
-      border: 1px solid rgba(255,255,255,.18);
-      font-weight: 800;
-      white-space: nowrap;
-    }
+    .bottom{position:fixed;inset:auto 14px 14px 14px;z-index:20;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+    .cta{border:1px solid rgba(255,255,255,.22);background:rgba(0,255,255,.14);color:#fff;padding:12px 14px;border-radius:14px;cursor:pointer;font-weight:850;transition:transform .15s ease;}
+    .cta.secondary{background:rgba(255,255,255,.10);}
+    .note{width:100%;text-align:center;color:rgba(255,255,255,.86);font-size:12px;opacity:.92}
 
-    /* أزرار أسفل */
-    .bottom{
-      position: fixed;
-      inset: auto 14px 14px 14px;
-      z-index: 20;
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .cta{
-      border: 1px solid rgba(255,255,255,.22);
-      background: rgba(0,255,255,.14);
-      color:#fff;
-      padding: 12px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight: 850;
-      transition: transform .15s ease;
-    }
-    .cta.secondary{ background: rgba(255,255,255,.10); }
-
-    .note{
-      width: 100%;
-      text-align:center;
-      color: rgba(255,255,255,.86);
-      font-size: 12px;
-      opacity: .92;
-    }
-
-    /* نافذة هزّة */
     .shakeToast{
-      position: fixed;
-      left: 50%;
-      bottom: 92px;
-      transform: translateX(-50%) translateY(20px);
-      opacity: 0;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 30;
-      padding: 10px 12px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.16);
-      color: rgba(255,255,255,.92);
-      backdrop-filter: blur(10px);
-      font-size: 12px;
-      pointer-events: none;
-      text-align:center;
-      max-width: 86vw;
+      position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);
+      opacity:0;transition:opacity .18s ease, transform .18s ease;z-index:30;
+      padding:10px 12px;border-radius:16px;background:rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);font-size:12px;pointer-events:none;text-align:center;max-width:86vw;
     }
-    .shakeToast.on{
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    .shakeToast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* رقصة CSS للبطاقة كـ fallback */
+    .danceCard{
+      animation: bounce 0.55s ease-in-out infinite alternate, sway 1.2s ease-in-out infinite;
     }
+    @keyframes bounce{ from{ transform:translate3d(0,0,0);} to{ transform:translate3d(0,-10px,0);} }
+    @keyframes sway{ 0%,100%{ filter: drop-shadow(0 25px 40px rgba(0,0,0,.35)); } 50%{ filter: drop-shadow(0 35px 55px rgba(0,0,0,.45)); } }
   </style>
 </head>
 
@@ -224,8 +83,8 @@
 
   <div class="hud">
     <div class="badge">
-      <h1>عالم متفائل… بحر + روبوت + AR</h1>
-      <p>هزّ الجوال لتجهيز AR، ثم اضغط زر “افتح AR الآن”.</p>
+      <h1>IdxAi — روبوت يرقص + AR</h1>
+      <p>اضغط “Dance” لتشغيل رقصة. هزّ الجوال يجهز زر AR.</p>
     </div>
     <button class="miniBtn" id="motionBtn">تفعيل الحركة</button>
   </div>
@@ -237,7 +96,6 @@
         <div class="soon">Sooonnn</div>
       </div>
 
-      <!-- روبوت جاهز (بدون ملفات محلية) -->
       <model-viewer id="mv"
         src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
         ios-src="https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz"
@@ -247,12 +105,13 @@
         auto-rotate
         shadow-intensity="0.9"
         exposure="1.0"
-        alt="IdxAi Robot">
+        alt="IdxAi Robot"
+        autoplay>
       </model-viewer>
 
       <div class="status">
         <div id="statusText">الحالة: جاهز ✅</div>
-        <div class="pill" id="capPill">AR: فحص…</div>
+        <div class="pill" id="animPill">ANIM: فحص…</div>
       </div>
     </div>
   </div>
@@ -260,9 +119,10 @@
   <div class="shakeToast" id="toast">هزّة! الآن اضغط “افتح AR الآن” 👇</div>
 
   <div class="bottom">
+    <button class="cta" id="danceBtn">Dance 🕺</button>
+    <button class="cta secondary" id="stopBtn">Stop</button>
     <button class="cta" id="arBtn">افتح AR الآن</button>
-    <button class="cta secondary" id="recenterBtn">إعادة تمركز</button>
-    <div class="note">مهم: لازم HTTPS + متصفح Chrome/Safari. الكاميرا/AR تحتاج لمسة زر (شرط أمان).</div>
+    <div class="note">مهم: AR يحتاج HTTPS + Chrome/Safari. الرقصة تعمل حتى بدون AR.</div>
   </div>
 
 <script>
@@ -279,22 +139,16 @@
   addEventListener('resize', resize, {passive:true});
   resize();
 
-  // قيم الميل من الجوال
   let tiltX=0, tiltY=0;
   const vignette = document.getElementById('vignette');
   const wrap = document.getElementById('wrap');
 
   function drawSea(){
     t += 0.008;
-
-    // خلفية
     const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, '#030817');
-    g.addColorStop(1, '#062a3a');
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
+    g.addColorStop(0, '#030817'); g.addColorStop(1, '#062a3a');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
 
-    // موجات
     for(let l=0; l<4; l++){
       const yBase = H*(0.45 + l*0.12) + tiltY*18*devicePixelRatio;
       const amp  = (18 + l*10) * devicePixelRatio;
@@ -308,34 +162,23 @@
           + Math.sin((x*freq*1.6) + t*speed*1.2)*amp*0.25;
         if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
       }
-      ctx.lineTo(W,H);
-      ctx.lineTo(0,H);
-      ctx.closePath();
+      ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
       ctx.fillStyle = `rgba(0, ${120+l*18}, ${140+l*22}, ${0.14+l*0.05})`;
       ctx.fill();
     }
-
-    // لمعات
-    for(let i=0;i<40;i++){
-      const sx = (Math.sin(i*99.7 + t*1.6) * 0.5 + 0.5) * W;
-      const sy = (Math.sin(i*37.3 + t*1.2) * 0.5 + 0.5) * H * 0.55;
-      const r  = (Math.sin(i*12.1 + t*2.2) * 0.5 + 0.5) * (2.0*devicePixelRatio);
-      ctx.fillStyle = `rgba(255,255,255,${0.05 + r*0.02})`;
-      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2); ctx.fill();
-    }
-
     requestAnimationFrame(drawSea);
   }
   drawSea();
 
-  // ===== UI + AR =====
+  // ===== Controls =====
   const mv = document.getElementById('mv');
   const arBtn = document.getElementById('arBtn');
-  const recenterBtn = document.getElementById('recenterBtn');
+  const danceBtn = document.getElementById('danceBtn');
+  const stopBtn = document.getElementById('stopBtn');
   const motionBtn = document.getElementById('motionBtn');
   const toast = document.getElementById('toast');
   const statusText = document.getElementById('statusText');
-  const capPill = document.getElementById('capPill');
+  const animPill = document.getElementById('animPill');
 
   function showToast(msg){
     toast.textContent = msg;
@@ -343,66 +186,87 @@
     setTimeout(()=>toast.classList.remove('on'), 1600);
   }
 
-  // فحص مبسط لقدرات AR (قد يختلف حسب الجهاز)
-  async function updateCapabilities(){
-    // model-viewer يختار الوضع تلقائياً إن كان متاحاً
-    // هنا نعرض مؤشرات فقط
-    const httpsOk = location.protocol === 'https:';
-    const ua = navigator.userAgent.toLowerCase();
-
-    let hint = [];
-    if (!httpsOk) hint.push("HTTPS ❌");
-    else hint.push("HTTPS ✅");
-
-    if (ua.includes('chrome')) hint.push("Chrome ✅");
-    else if (ua.includes('safari')) hint.push("Safari ✅");
-    else hint.push("Browser ?");
-
-    capPill.textContent = "AR: جاهزية";
-    statusText.textContent = "الحالة: " + hint.join(" | ");
+  // --- قائمة أنيميشنات داخل الموديل ---
+  let animations = [];
+  function pickDanceName(list){
+    const lower = list.map(a => String(a).toLowerCase());
+    const candidates = ["dance", "dancing", "hiphop", "shuffle", "wave", "run", "walk", "idle"];
+    for (const c of candidates){
+      const idx = lower.findIndex(x => x.includes(c));
+      if (idx >= 0) return list[idx];
+    }
+    return list[0] || null;
   }
-  updateCapabilities();
 
-  // زر فتح AR
+  mv.addEventListener('load', () => {
+    animations = (mv.availableAnimations || []).slice();
+    if (animations.length){
+      animPill.textContent = "ANIM: " + animations.length;
+      statusText.textContent = "الحالة: تم تحميل الروبوت ✅";
+    } else {
+      animPill.textContent = "ANIM: none";
+      statusText.textContent = "الحالة: لا توجد أنيميشنات — سنستخدم رقصة CSS.";
+    }
+  });
+
+  // --- زر AR ---
   arBtn.addEventListener('click', async ()=>{
     try{
       statusText.textContent = "الحالة: محاولة فتح AR…";
-      await mv.activateAR(); // يفتح WebXR أو Scene Viewer أو Quick Look حسب الجهاز
+      await mv.activateAR();
       statusText.textContent = "الحالة: تم فتح AR ✅";
     }catch(e){
-      // لو ما فيه AR mode
       statusText.textContent = "الحالة: AR غير متاح على هذا الجهاز/المتصفح.";
-      capPill.textContent = "AR: غير مدعوم";
       showToast("AR غير متاح هنا. جرّب Chrome + ARCore + HTTPS.");
       console.warn(e);
     }
   });
 
-  // إعادة تمركز/إعادة ضبط الكاميرا داخل الـ model-viewer
-  recenterBtn.addEventListener('click', ()=>{
-    try{
-      mv.jumpCameraToGoal();
-      showToast("تمت إعادة التمركز ✅");
-    }catch{
-      // بعض الإصدارات قد لا تدعمها
-      mv.cameraOrbit = "0deg 75deg auto";
-      mv.fieldOfView = "45deg";
-      showToast("تمت إعادة ضبط العرض ✅");
-    }
-  });
+  // --- Dance ---
+  let dancing = false;
+  function startDance(){
+    dancing = true;
+    wrap.classList.add('danceCard');
 
-  // ===== Motion Permission + Tilt + Shake =====
+    if (animations.length){
+      const name = pickDanceName(animations);
+      mv.animationName = name;
+      mv.autoplay = true;
+      mv.play();
+      animPill.textContent = "ANIM: " + name;
+      statusText.textContent = "الحالة: الروبوت يرقص ✅";
+      showToast("Dance: " + name);
+    } else {
+      statusText.textContent = "الحالة: رقصة CSS ✅";
+      showToast("Dance (CSS) ✅");
+    }
+  }
+
+  function stopDance(){
+    dancing = false;
+    wrap.classList.remove('danceCard');
+    try { mv.pause(); } catch {}
+    statusText.textContent = "الحالة: توقف ✅";
+    showToast("Stop ✅");
+  }
+
+  danceBtn.addEventListener('click', startDance);
+  stopBtn.addEventListener('click', stopDance);
+
+  // ===== Motion (Tilt + Shake) =====
   let motionEnabled = false;
   let lastShake = 0;
 
   function onOrientation(e){
-    const g = (e.gamma ?? 0); // يمين/يسار
-    const b = (e.beta  ?? 0); // أمام/خلف
+    const g = (e.gamma ?? 0);
+    const b = (e.beta  ?? 0);
     tiltX = Math.max(-1, Math.min(1, g / 30));
     tiltY = Math.max(-1, Math.min(1, b / 30));
 
     vignette.style.transform = `translate3d(${tiltX*14}px, ${tiltY*10}px, 0)`;
-    wrap.style.transform = `translate3d(${tiltX*8}px, ${tiltY*6}px, 0) rotate(${tiltX*2.5}deg)`;
+    if (!dancing){
+      wrap.style.transform = `translate3d(${tiltX*8}px, ${tiltY*6}px, 0) rotate(${tiltX*2.5}deg)`;
+    }
   }
 
   function onMotion(e){
@@ -412,18 +276,15 @@
     const mag = Math.sqrt(ax*ax + ay*ay + az*az);
     const now = performance.now();
 
-    // عتبة الهزّة (يمكن تعديلها)
     if (mag > 18 && (now - lastShake) > 1200){
       lastShake = now;
 
-      // لا نفتح AR مباشرة (ممنوع غالباً)، نجهّز المستخدم
+      // لا نفتح AR تلقائيًا (قيود الأمان) — نجهز زر AR
       arBtn.style.transform = "scale(1.12)";
       arBtn.textContent = "هزّة! اضغط لفتح AR الآن";
       arBtn.scrollIntoView({behavior:"smooth", block:"center"});
-
       if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-
-      showToast("هزّة! اضغط زر AR 👇");
+      showToast("هزّة! زر AR جاهز 👇");
       setTimeout(()=>{
         arBtn.style.transform = "scale(1)";
         arBtn.textContent = "افتح AR الآن";
@@ -434,13 +295,9 @@
   async function enableMotion(){
     if (motionEnabled) return;
     try{
-      // iOS يحتاج permission
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         const r = await DeviceMotionEvent.requestPermission();
-        if (r !== 'granted') {
-          showToast("تم رفض صلاحية الحركة.");
-          return;
-        }
+        if (r !== 'granted') { showToast("تم رفض صلاحية الحركة."); return; }
       }
       window.addEventListener('deviceorientation', onOrientation, {passive:true});
       window.addEventListener('devicemotion', onMotion, {passive:true});
@@ -455,13 +312,7 @@
   }
 
   motionBtn.addEventListener('click', enableMotion);
-
-  // على أجهزة كثيرة (Android) يشتغل بدون طلب إذن
-  // لكن نخليها لطيفة: أول تفاعل يفعّل تلقائياً
-  window.addEventListener('click', () => {
-    if (!motionEnabled) enableMotion();
-  }, { once: true });
-
+  window.addEventListener('click', () => { if (!motionEnabled) enableMotion(); }, { once:true });
 })();
 </script>
 </body>
