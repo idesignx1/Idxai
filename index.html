@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>IdxAi — Sooonnn (AR)</title>
+
+  <!-- model-viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden;background:#050b18;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    #sea{position:fixed;inset:0;width:100%;height:100%;display:block;}
+    .glass{
+      position:fixed;left:16px;right:16px;top:16px;z-index:10;
+      padding:14px;border-radius:18px;
+      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+      color:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+    }
+    .glass h1{margin:0;font-size:18px}
+    .glass p{margin:8px 0 0;font-size:13px;opacity:.9;line-height:1.4}
+    .stage{position:fixed;inset:110px 16px 90px 16px;display:grid;place-items:center;z-index:5;}
+    model-viewer{
+      width:min(520px,96vw);height:min(620px,62vh);
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:26px;backdrop-filter:blur(10px);
+      box-shadow:0 30px 70px rgba(0,0,0,.45);
+      overflow:hidden;
+    }
+    .bottom{position:fixed;left:16px;right:16px;bottom:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;z-index:10;}
+    button{
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(0,255,255,.14);
+      color:#fff;padding:12px 14px;border-radius:14px;font-weight:700;cursor:pointer;
+    }
+    .note{width:100%;text-align:center;color:rgba(255,255,255,.86);font-size:12px;opacity:.9}
+  </style>
+</head>
+
+<body>
+  <canvas id="sea"></canvas>
+
+  <div class="glass">
+    <h1>IdxAi — Sooonnn</h1>
+    <p>اضغط “افتح AR الآن” عشان يظهر الـ AR الواقعي على الكاميرا (مطلوب تفاعل يدوي من المتصفح).</p>
+  </div>
+
+  <div class="stage">
+    <model-viewer id="mv"
+      src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+      ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      camera-controls
+      auto-rotate
+      shadow-intensity="0.8"
+      exposure="1.0"
+      alt="IdxAi AR Model">
+    </model-viewer>
+  </div>
+
+  <div class="bottom">
+    <button id="arBtn">افتح AR الآن</button>
+    <div class="note">مهم: لازم تفتح الصفحة عبر HTTPS (مثل Netlify)، وإلا الكاميرا/AR ما تشتغل.</div>
+  </div>
+
+<script>
+(() => {
+  // بحر متحرك خفيف (Canvas)
+  const c = document.getElementById('sea');
+  const ctx = c.getContext('2d',{alpha:false});
+  let W=0,H=0,t=0;
+  const resize=()=>{W=c.width=innerWidth*devicePixelRatio;H=c.height=innerHeight*devicePixelRatio;};
+  addEventListener('resize',resize,{passive:true}); resize();
+
+  function draw(){
+    t+=0.008;
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#030817'); g.addColorStop(1,'#062a3a');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    for(let l=0;l<4;l++){
+      const yBase=H*(0.45+l*0.12);
+      const amp=(18+l*10)*devicePixelRatio;
+      const freq=0.006+l*0.0015;
+      const speed=0.7+l*0.35;
+
+      ctx.beginPath();
+      for(let x=0;x<=W;x+=8*devicePixelRatio){
+        const y=yBase + Math.sin((x*freq)+t*speed+l)*amp + Math.sin((x*freq*1.6)+t*speed*1.2)*amp*0.25;
+        if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+      ctx.fillStyle=`rgba(0,${120+l*18},${140+l*22},${0.14+l*0.05})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // تشغيل AR (لازم زر)
+  const mv = document.getElementById('mv');
+  document.getElementById('arBtn').addEventListener('click', async ()=>{
+    if (mv && typeof mv.activateAR === 'function') {
+      try { await mv.activateAR(); }
+      catch { alert('AR غير متاح على جهازك أو الصفحة ليست HTTPS أو الإذن مرفوض.'); }
+    } else {
+      alert('model-viewer لم يجهز بعد.');
+    }
+  });
+})();
+</script>
+</body>
+</html>
